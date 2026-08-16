@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance System - SVSPM Udgir</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eef2f5; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .card { background: #ffffff; padding: 25px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); width: 100%; max-width: 720px; }
+        .college-header { text-align: center; border-bottom: 2px solid #007bff; padding-bottom: 15px; margin-bottom: 20px; }
+        .logo-container { display: flex; justify-content: center; align-items: center; margin-bottom: 10px; }
+        .college-logo { width: 95px; height: 95px; object-fit: contain; border-radius: 50%; padding: 2px; background: #fff; }
+        .mandal-title { margin: 0; color: #007bff; font-size: 13px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; }
+        .college-title { margin: 4px 0 0 0; color: #1a252f; font-size: 22px; font-weight: bold; }
+        .college-sub { margin: 5px 0 0 0; color: #6c757d; font-size: 13px; }
+        
+        /* Department Sub-Header Style */
+        .dept-main-title {
+            text-align: center;
+            background: #eef7ff;
+            color: #0056b3;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border: 1px dashed #b8daff;
+            letter-spacing: 0.5px;
+        }
+
+        /* Buttons Design */
+        .btn { padding: 6px 10px; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; transition: 0.3s; }
+        .btn-p { background-color: #e0e0e0; color: #555; }
+        .btn-a { background-color: #e0e0e0; color: #555; }
+        .active-p { background-color: #28a745 !important; color: white !important; box-shadow: 0 0 5px rgba(40,167,69,0.5); }
+        .active-a { background-color: #dc3545 !important; color: white !important; box-shadow: 0 0 5px rgba(220,53,69,0.5); }
+        
+        .btn-main { width: 100%; padding: 10px; margin: 6px 0; border-radius: 6px; color: white; border: none; cursor: pointer; font-weight: bold; }
+        .btn-blue { background-color: #007bff; }
+        .btn-add { background-color: #28a745; margin-top: 5px; }
+        .btn-excel { background-color: #17a2b8; }
+        .btn-danger { background-color: #dc3545; padding: 5px 8px; font-size: 12px; color: white; }
+        .btn-edit { background-color: #ffc107; color: #000; padding: 5px 8px; font-size: 12px; font-weight: bold; margin-right: 4px; }
+        .btn-restore { background-color: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; font-weight: bold; }
+        .btn-toggle-bin { background-color: #6c757d; margin-top: 15px; }
+
+        input, select { width: 100%; padding: 10px; margin: 6px 0; border: 1px solid #cccccc; border-radius: 6px; box-sizing: border-box; }
+        
+        .add-student-box { background: #eef7ff; padding: 15px; border-radius: 8px; border: 1px solid #b8daff; margin-bottom: 15px; margin-top: 15px; }
+        .bin-box { background: #fff3cd; padding: 15px; border-radius: 8px; border: 1px solid #ffeeba; margin-top: 20px; }
+
+        /* Current Department Banner Style */
+        .dept-banner {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        th, td { border: 1px solid #dee2e6; padding: 8px; text-align: center; }
+        th { background-color: #343a40; color: white; }
+        
+        .hidden { display: none; }
+        .error-text { color: red; font-size: 13px; margin-top: 5px; display: none; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="college-header">
+            <div class="logo-container">
+                <img id="collegeLogoImg" src="logo.png" alt="SVSPM College Logo" class="college-logo" onerror="this.src='https://i.postimg.co/DzhxP3yW/Aha-Convert-images.png'">
+            </div>
+            <p class="mandal-title">Swami Vivekanand Shikshan Prasarak Mandal's</p>
+            <h1 class="college-title">Swami Vivekanand Mahavidyalaya</h1>
+            <p class="college-sub">Udgir, Dist. Latur | Smart Student Attendance Portal</p>
+        </div>
+
+        <!-- 🖥️ DEPARTMENT SUB-HEADER -->
+        <div class="dept-main-title">
+            💻 Department of Computer Science
+        </div>
+
+        <!-- LOGIN FORM WITH PASSWORD -->
+        <div id="loginSection">
+            <h3 style="text-align: center;">Teacher Login</h3>
+            <input type="text" id="username" placeholder="Enter Teacher Name">
+            <input type="password" id="password" placeholder="Enter Password">
+            <p id="loginError" class="error-text">❌ Incorrect Password!</p>
+            <button onclick="showAttendanceScreen()" class="btn-main btn-blue">Login to Dashboard</button>
+        </div>
+
+        <div id="attendanceSection" class="hidden">
+            <h3 id="welcomeMsg" style="text-align: center;">Teacher Dashboard</h3>
+
+            <!-- Department & Class Selection -->
+            <div style="display: flex; gap: 10px;">
+                <select id="selectedDept" onchange="renderTable()"><option value="B.Sc (CS)">B.Sc (CS)</option><option value="BCA">BCA</option></select>
+                <select id="selectedClass" onchange="renderTable()"><option value="FY">FY</option><option value="SY">SY</option><option value="TY">TY</option></select>
+            </div>
+
+            <!-- ➕ MANUAL ADD STUDENT FORM -->
+            <div class="add-student-box">
+                <h4 style="margin: 0 0 8px 0; color: #0056b3;">➕ Add Student</h4>
+                <div style="display: flex; gap: 8px;">
+                    <input type="number" id="addRoll" placeholder="Roll No" style="width: 30%;">
+                    <input type="text" id="addName" placeholder="Student Full Name" style="width: 70%;">
+                </div>
+                <button onclick="addManualStudent()" class="btn-main btn-add">+ Add Student to List</button>
+            </div>
+
+            <!-- 🏷️ DEPARTMENT & CLASS HEADING BANNER -->
+            <div id="deptHeadingBanner" class="dept-banner">
+                Attendance Sheet: B.Sc (CS) - FY
+            </div>
+
+            <!-- Attendance Table -->
+            <table id="attendanceTable">
+                <thead><tr><th>Roll</th><th>Name</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody id="studentTableBody"></tbody>
+            </table>
+
+            <button onclick="submitAttendance()" class="btn-main btn-blue" style="margin-top: 20px;">Calculate Attendance</button>
+            <button onclick="exportToCSV()" class="btn-main btn-excel">📥 Download Excel</button>
+            <div id="summary" class="hidden" style="margin-top: 15px; padding: 10px; background: #e9ecef; text-align: center; font-weight: bold;"></div>
+
+            <!-- 🗑️ RESTORE / DELETED STUDENTS SECTION -->
+            <button onclick="toggleBinSection()" class="btn-main btn-toggle-bin">🗑️ View & Restore Deleted Students (<span id="binCount">0</span>)</button>
+            
+            <div id="binSection" class="bin-box hidden">
+                <h4 style="margin: 0 0 8px 0; color: #856404;">♻️ Deleted Students Archive (Can be Restored)</h4>
+                <table style="background: white;">
+                    <thead><tr><th>Roll</th><th>Name</th><th>Dept-Class</th><th>Action</th></tr></thead>
+                    <tbody id="binTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let students = JSON.parse(localStorage.getItem('deptClassStudentsList')) || [];
+        let deletedStudents = JSON.parse(localStorage.getItem('deletedStudentsList')) || [];
+
+        function showAttendanceScreen() {
+            let name = document.getElementById('username').value;
+            let pass = document.getElementById('password').value;
+            let errorMsg = document.getElementById('loginError');
+
+            if(!name.trim()) {
+                alert("Please enter Teacher Name!");
+                return;
+            }
+
+            if(pass === "SVM355") {
+                errorMsg.style.display = "none";
+                document.getElementById('welcomeMsg').innerText = "Welcome, Prof. " + name;
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('attendanceSection').classList.remove('hidden');
+                renderTable();
+                updateBinCount();
+            } else {
+                errorMsg.style.display = "block";
+            }
+        }
+
+        function addManualStudent() {
+            let rollInput = document.getElementById('addRoll');
+            let nameInput = document.getElementById('addName');
+            
+            let roll = rollInput.value.trim();
+            let name = nameInput.value.trim();
+            let currentDept = document.getElementById('selectedDept').value;
+            let currentCls = document.getElementById('selectedClass').value;
+
+            if(!roll || !name) {
+                alert("कृपया Roll No आणि Student Name दोन्ही भरा!");
+                return;
+            }
+
+            let newStudent = {
+                roll: String(roll),
+                name: name,
+                dept: currentDept,
+                cls: currentCls,
+                status: 'P'
+            };
+
+            students.push(newStudent);
+            saveAndRender();
+
+            rollInput.value = "";
+            nameInput.value = "";
+            alert(`✅ ${name} (Roll No: ${roll}) यशस्वीरीत्या ॲड झाला!`);
+        }
+
+        function updateStatus(index, status) {
+            students[index].status = status;
+            saveAndRender();
+        }
+
+        function renderTable() {
+            let d = document.getElementById('selectedDept').value;
+            let c = document.getElementById('selectedClass').value;
+            
+            document.getElementById('deptHeadingBanner').innerText = `📋 Attendance Sheet: ${d} - ${c}`;
+
+            let tbody = document.getElementById('studentTableBody');
+            tbody.innerHTML = "";
+            
+            let filtered = students.filter(s => s.dept === d && s.cls === c);
+            
+            if(filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="color: #6c757d; padding: 15px;">या वर्गात काहीही विद्यार्थी उपलब्ध नाहीत.<br>वरील <strong>"+ Add Student"</strong> बॉक्स वापरून विद्यार्थी ॲड करा!</td></tr>`;
+                return;
+            }
+
+            filtered.forEach((s) => {
+                let actualIdx = students.indexOf(s);
+                tbody.innerHTML += `<tr>
+                    <td>${s.roll}</td>
+                    <td>${s.name}</td>
+                    <td>
+                        <button class="btn btn-p ${s.status==='P'?'active-p':''}" onclick="updateStatus(${actualIdx}, 'P')">P</button>
+                        <button class="btn btn-a ${s.status==='A'?'active-a':''}" onclick="updateStatus(${actualIdx}, 'A')">A</button>
+                    </td>
+                    <td>
+                        <button class="btn btn-edit" onclick="editStudentName(${actualIdx})">Edit</button>
+                        <button class="btn btn-danger" onclick="deleteStudent(${actualIdx})">Delete</button>
+                    </td>
+                </tr>`;
+            });
+        }
+
+        // ✏️ विद्यार्थ्याचे नाव एडिट करण्याचे फंक्शन
+        function editStudentName(index) {
+            let currentName = students[index].name;
+            let newName = prompt("विद्यार्थ्याचे नवीन नाव प्रविष्ट करा:", currentName);
+            
+            if (newName !== null) {
+                newName = newName.trim();
+                if (newName !== "") {
+                    students[index].name = newName;
+                    saveAndRender();
+                    alert("✅ विद्यार्थ्याचे नाव यशस्वीरीत्या बदलले आहे!");
+                } else {
+                    alert("⚠️ नाव रिकामे ठेवता येणार नाही!");
+                }
+            }
+        }
+
+        function deleteStudent(index) { 
+            if(confirm("हा विद्यार्थी डिलीट करून रेकॉर्ड सुरक्षित ठेवायचा आहे का?")) {
+                let removed = students.splice(index, 1)[0];
+                deletedStudents.push(removed);
+                localStorage.setItem('deletedStudentsList', JSON.stringify(deletedStudents));
+                saveAndRender(); 
+                updateBinCount();
+                renderBinTable();
+            }
+        }
+
+        function restoreStudent(binIndex) {
+            let restored = deletedStudents.splice(binIndex, 1)[0];
+            students.push(restored);
+            localStorage.setItem('deletedStudentsList', JSON.stringify(deletedStudents));
+            saveAndRender();
+            updateBinCount();
+            renderBinTable();
+            alert(`♻️ ${restored.name} पुन्हा यशस्वीरीत्या ${restored.dept} - ${restored.cls} मध्ये रिस्टोअर केला!`);
+        }
+
+        function toggleBinSection() {
+            let bin = document.getElementById('binSection');
+            bin.classList.toggle('hidden');
+            renderBinTable();
+        }
+
+        function renderBinTable() {
+            let binBody = document.getElementById('binTableBody');
+            binBody.innerHTML = "";
+
+            if(deletedStudents.length === 0) {
+                binBody.innerHTML = `<tr><td colspan="4" style="color: #6c757d; padding: 10px;">कोणताही डिलीट केलेला विद्यार्थी उपलब्ध नाही.</td></tr>`;
+                return;
+            }
+
+            deletedStudents.forEach((s, idx) => {
+                binBody.innerHTML += `<tr>
+                    <td>${s.roll}</td>
+                    <td>${s.name}</td>
+                    <td>${s.dept} - ${s.cls}</td>
+                    <td><button class="btn btn-restore" onclick="restoreStudent(${idx})">Restore</button></td>
+                </tr>`;
+            });
+        }
+
+        function updateBinCount() {
+            document.getElementById('binCount').innerText = deletedStudents.length;
+        }
+
+        function saveAndRender() { 
+            localStorage.setItem('deptClassStudentsList', JSON.stringify(students)); 
+            renderTable(); 
+        }
+
+        function submitAttendance() {
+            let d = document.getElementById('selectedDept').value;
+            let c = document.getElementById('selectedClass').value;
+            let list = students.filter(s => s.dept === d && s.cls === c);
+            let p = list.filter(s => s.status === 'P').length;
+            let div = document.getElementById('summary');
+            div.innerHTML = `Total: ${list.length} | Present: ${p} | Absent: ${list.length - p}`;
+            div.classList.remove('hidden');
+        }
+
+        function exportToCSV() {
+            let csv = "Roll,Name,Status\n";
+            students.forEach(s => csv += `${s.roll},${s.name},${s.status}\n`);
+            let link = document.createElement('a');
+            link.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+            link.download = "Attendance.csv";
+            link.click();
+        }
+    </script>
+</body>
+</html>
