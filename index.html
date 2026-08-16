@@ -135,7 +135,7 @@
   </main>
 
   <script>
-    // ऑटो लॉगिन चेक (पेज लोड झाल्यावर चालू होईल)
+    // ऑटो लॉगिन तपासणे (Auto-Login Check)
     function checkAutoLogin() {
       const savedTeacher = localStorage.getItem('teacherName');
       if (savedTeacher) {
@@ -156,9 +156,7 @@
       }
 
       if (p === 'SVMU355') {
-        // ब्राऊझरमध्ये नाव सेव्ह ठेवणे
         localStorage.setItem('teacherName', u);
-        
         document.getElementById('teacherDisplayName').innerText = u;
         document.getElementById('loginSection').style.display = 'none';
         document.getElementById('dashboardSection').classList.remove('hidden');
@@ -169,9 +167,7 @@
     }
 
     function logout() {
-      // सेव्ह केलेले नाव काढून टाकणे
       localStorage.removeItem('teacherName');
-      
       document.getElementById('dashboardSection').classList.add('hidden');
       document.getElementById('loginSection').style.display = 'block';
       document.getElementById('username').value = '';
