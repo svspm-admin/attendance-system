@@ -31,7 +31,7 @@
     const database = firebase.database();
   </script>
 </head>
-<body class="bg-gray-100 min-h-screen text-gray-800">
+<body class="bg-gray-100 min-h-screen text-gray-800" onload="checkAutoLogin()">
 
   <!-- Header -->
   <header class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-6 shadow-lg">
@@ -135,6 +135,17 @@
   </main>
 
   <script>
+    // ऑटो लॉगिन चेक (पेज लोड झाल्यावर चालू होईल)
+    function checkAutoLogin() {
+      const savedTeacher = localStorage.getItem('teacherName');
+      if (savedTeacher) {
+        document.getElementById('teacherDisplayName').innerText = savedTeacher;
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('dashboardSection').classList.remove('hidden');
+        loadStudents();
+      }
+    }
+
     function login() {
       const u = document.getElementById('username').value.trim();
       const p = document.getElementById('password').value.trim();
@@ -145,6 +156,9 @@
       }
 
       if (p === 'SVMU355') {
+        // ब्राऊझरमध्ये नाव सेव्ह ठेवणे
+        localStorage.setItem('teacherName', u);
+        
         document.getElementById('teacherDisplayName').innerText = u;
         document.getElementById('loginSection').style.display = 'none';
         document.getElementById('dashboardSection').classList.remove('hidden');
@@ -155,6 +169,9 @@
     }
 
     function logout() {
+      // सेव्ह केलेले नाव काढून टाकणे
+      localStorage.removeItem('teacherName');
+      
       document.getElementById('dashboardSection').classList.add('hidden');
       document.getElementById('loginSection').style.display = 'block';
       document.getElementById('username').value = '';
