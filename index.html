@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance System - SVSPM Udgir</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- SheetJS for Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- Firebase Compatibility SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+  <script>
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDWlyQvWNrSBEtB-SmwtQsktqNuLc86lyQ",
+      authDomain: "svspm-attendance.firebaseapp.com",
+      databaseURL: "https://svspm-attendance-default-rtdb.firebaseio.com",
+      projectId: "svspm-attendance",
+      storageBucket: "svspm-attendance.firebasestorage.app",
+      messagingSenderId: "50741659848",
+      appId: "1:50741659848:web:d741c176dc3b762fd57dfd"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+  </script>
+</head>
+<body class="bg-gray-100 min-h-screen text-gray-800">
+
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-6 shadow-lg">
+    <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <img src="logo.png" alt="SVSPM Logo" class="h-16 w-16 object-contain rounded-full bg-white p-1 shadow">
+        <div>
+          <p class="text-xs uppercase tracking-widest text-blue-200 font-semibold">SWAMI VIVEKANAND SHIKSHAN PRASARAK MANDAL'S</p>
+          <h1 class="text-2xl font-extrabold tracking-wide">Swami Vivekanand Mahavidyalaya</h1>
+          <p class="text-xs opacity-90">Udgir, Dist. Latur | Smart Student Attendance Portal</p>
+        </div>
+      </div>
+      <div class="text-right border-l-0 md:border-l border-blue-700 pl-0 md:pl-4">
+        <p class="text-sm font-semibold text-blue-200"><i class="fa-solid fa-laptop-code mr-1"></i>Department of Computer Science</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto p-4 md:p-6">
+    
+    <!-- LOGIN BOX -->
+    <div id="loginSection" class="bg-white p-8 rounded-xl shadow-md border border-gray-200 max-w-md mx-auto my-12">
+      <h2 class="text-2xl font-bold text-center text-blue-900 mb-6"><i class="fa-solid fa-user-lock mr-2"></i>Teacher Login</h2>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-semibold mb-1">Teacher Name</label>
+          <input type="text" id="username" placeholder="Enter Teacher Name" class="w-full p-2 border rounded-lg focus:outline-blue-600">
+        </div>
+        <div>
+          <label class="block text-sm font-semibold mb-1">Password</label>
+          <input type="password" id="password" placeholder="Enter Password" class="w-full p-2 border rounded-lg focus:outline-blue-600">
+        </div>
+        <button type="button" onclick="login()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 rounded-lg transition shadow">
+          Login to Dashboard
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN DASHBOARD -->
+    <div id="dashboardSection" class="hidden space-y-6">
+      
+      <!-- Top Filters Bar -->
+      <div class="bg-white p-5 rounded-xl shadow-md border border-gray-200">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4 border-b pb-4">
+          <h2 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-user-circle mr-2 text-blue-700"></i>Welcome, <span id="teacherDisplayName">Teacher</span></h2>
+          <div class="flex items-center gap-2">
+            <select id="courseSelect" onchange="loadStudents()" class="border p-2 rounded-lg bg-gray-50 text-sm font-semibold">
+              <option value="BSc_CS">B.Sc (CS)</option>
+              <option value="BCA">BCA</option>
+            </select>
+            <select id="yearSelect" onchange="loadStudents()" class="border p-2 rounded-lg bg-gray-50 text-sm font-semibold">
+              <option value="FY">FY</option>
+              <option value="SY">SY</option>
+              <option value="TY">TY</option>
+            </select>
+            <button onclick="logout()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2 px-3 rounded-lg ml-2">
+              Logout
+            </button>
+          </div>
+        </div>
+
+        <!-- Add Student -->
+        <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+          <h3 class="text-md font-bold text-blue-900 mb-3"><i class="fa-solid fa-user-plus mr-2"></i>➕ Add Student</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <input type="number" id="rollNo" placeholder="Roll No" class="p-2 border rounded-lg focus:outline-blue-500">
+            <input type="text" id="studentName" placeholder="Student Full Name" class="p-2 border rounded-lg focus:outline-blue-500">
+            <button onclick="addStudent()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow transition">
+              + Add Student
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Attendance Table -->
+      <div class="bg-white p-5 rounded-xl shadow-md border border-gray-200">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-2">
+          <h3 class="text-lg font-bold text-gray-800" id="sheetTitle"><i class="fa-solid fa-clipboard-user mr-2 text-blue-700"></i>📋 Attendance Sheet</h3>
+          <button onclick="downloadExcel()" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-2 px-3 rounded-lg shadow">
+            📥 Download Excel
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-gray-100 text-gray-700 text-sm">
+                <th class="p-3 border">Roll No</th>
+                <th class="p-3 border">Student Name</th>
+                <th class="p-3 border text-center">Status</th>
+                <th class="p-3 border text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody id="studentList" class="text-sm"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    function login() {
+      const u = document.getElementById('username').value.trim();
+      const p = document.getElementById('password').value.trim();
+
+      if (!u) {
+        alert('कृपया तुमचे नाव टाका!');
+        return;
+      }
+
+      if (p === 'SVMU355') {
+        document.getElementById('teacherDisplayName').innerText = u;
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('dashboardSection').classList.remove('hidden');
+        loadStudents();
+      } else {
+        alert('गलत Password! कृपया योग्य पासवर्ड टाका.');
+      }
+    }
+
+    function logout() {
+      document.getElementById('dashboardSection').classList.add('hidden');
+      document.getElementById('loginSection').style.display = 'block';
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
+    }
+
+    function getClassKey() {
+      const course = document.getElementById('courseSelect').value;
+      const year = document.getElementById('yearSelect').value;
+      return `${course}_${year}`;
+    }
+
+    function loadStudents() {
+      const classKey = getClassKey();
+      document.getElementById('sheetTitle').innerHTML = `<i class="fa-solid fa-clipboard-user mr-2 text-blue-700"></i>📋 Attendance Sheet: ${document.getElementById('courseSelect').value} - ${document.getElementById('yearSelect').value}`;
+
+      database.ref('students/' + classKey).on('value', (snapshot) => {
+        const list = document.getElementById('studentList');
+        list.innerHTML = '';
+        const data = snapshot.val();
+
+        if (data) {
+          Object.keys(data).forEach((id) => {
+            const student = data[id];
+            const isPresent = student.status === 'Present';
+            list.innerHTML += `
+              <tr class="border-b hover:bg-gray-50">
+                <td class="p-3 border font-bold text-gray-700">${student.rollNo}</td>
+                <td class="p-3 border font-semibold">${student.name}</td>
+                <td class="p-3 border text-center">
+                  <span class="px-3 py-1 rounded-full text-xs font-bold ${isPresent ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                    ${student.status || 'Absent'}
+                  </span>
+                </td>
+                <td class="p-3 border text-center">
+                  <button onclick="toggleStatus('${id}', '${student.status}')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded shadow mr-2">
+                    Mark ${isPresent ? 'Absent' : 'Present'}
+                  </button>
+                  <button onclick="deleteStudent('${id}')" class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded shadow">
+                    🗑️ Delete
+                  </button>
+                </td>
+              </tr>
+            `;
+          });
+        } else {
+          list.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500">या वर्गात विद्यार्थी उपलब्ध नाहीत.</td></tr>`;
+        }
+      });
+    }
+
+    function addStudent() {
+      const rollNo = document.getElementById('rollNo').value;
+      const name = document.getElementById('studentName').value;
+      if (rollNo && name) {
+        database.ref('students/' + getClassKey()).push({
+          rollNo: rollNo,
+          name: name,
+          status: 'Absent'
+        });
+        document.getElementById('rollNo').value = '';
+        document.getElementById('studentName').value = '';
+      } else {
+        alert('कृपया Roll No आणि नाव टाका!');
+      }
+    }
+
+    function toggleStatus(id, currentStatus) {
+      const newStatus = currentStatus === 'Present' ? 'Absent' : 'Present';
+      database.ref(`students/${getClassKey()}/${id}`).update({ status: newStatus });
+    }
+
+    function deleteStudent(id) {
+      if (confirm('विद्यार्थी काढून टाकायचा आहे का?')) {
+        database.ref(`students/${getClassKey()}/${id}`).remove();
+      }
+    }
+
+    function downloadExcel() {
+      database.ref('students/' + getClassKey()).once('value', (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return alert('डाऊनलोड करण्यासाठी डेटा उपलब्ध नाही!');
+        const excelData = Object.values(data).map(s => ({ 'Roll No': s.rollNo, 'Name': s.name, 'Status': s.status }));
+        const ws = XLSX.utils.json_to_sheet(excelData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Attendance");
+        XLSX.writeFile(wb, `Attendance_${getClassKey()}.xlsx`);
+      });
+    }
+  </script>
+</body>
+</html>
