@@ -329,5 +329,27 @@
             link.click();
         }
     </script>
+    <!-- Firebase Libraries (CDN) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+<script>
+  // १. तुमची Firebase Configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyDWlyQvWNrSBEtB-SmwtQsktqNuLc86lyQ",
+    authDomain: "svspm-attendance.firebaseapp.com",
+    databaseURL: "https://svspm-attendance-default-rtdb.firebaseio.com",
+    projectId: "svspm-attendance",
+    storageBucket: "svspm-attendance.firebasestorage.app",
+    messagingSenderId: "50741659848",
+    appId: "1:50741659848:web:d741c176dc3b762fd57dfd"
+  };
+
+  // २. Firebase सुरू करा
+  firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
+
+  console.log("Firebase Connected Successfully!");
+</script>
 </body>
 </html>
